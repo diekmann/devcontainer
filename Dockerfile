@@ -19,6 +19,8 @@ RUN useradd -ms /bin/bash vscode
 RUN echo vscode:securepassword1 | chpasswd
 
 
+#TODO: caching! update always with install and rm the cache.
+
 RUN apt update && apt upgrade -y && apt dist-upgrade -y
 
 # For debugging: ss
@@ -33,3 +35,4 @@ RUN cat /home/vscode/.ssh/id_ed25519.pub > /home/vscode/.ssh/authorized_keys
 EXPOSE 22
 RUN service ssh start
 ENTRYPOINT ["/usr/sbin/sshd","-D"]
+
