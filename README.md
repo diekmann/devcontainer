@@ -6,20 +6,22 @@ A hardened dev environment in a container. For use with vscode. Via ssh; not con
 
 At the example of mounting `~/git/OpenTTD` into the container.
 
+We assume rootless podman.
+
 ```sh
+$ cp ~/.ssh/id_ed25519.pub .
 $ podman build -t devcontainer-deb-ssh-image .
 $ podman run --name devcontainer-deb-ssh -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD -d devcontainer-deb-ssh-image
 ```
 
 
-TODO:
-Failed to save 'test': Unable to write file 'vscode-remote://ssh-remote+127.0.0.1/home/vscode/git/OpenTTD/test' (NoPermissions (FileSystemError): Error: EACCES: permission denied, open '/home/vscode/git/OpenTTD/test')
-trying --user=vscode 
-Thanks
-https://www.reddit.com/r/podman/comments/103ut7z/explain_it_like_im_5_whats_the_recommended_way_of/
 Options explained
-By default, we run the sshd as root, so we need `--user 0:0`.
-But we want to be able to access `/home/vscode/git/OpenTTD` as the `vscode` user. So we need to make make sure we propagate the this. This assumes the host user has `id -u` as 1000. TODO: test with different uid. Replace with `id -u` and make a variable to explain this.
+* The sshd in the container is bound to `127.0.0.1:2222`, not externally reachable.
+* By default, we run the sshd as root, so we need `--user 0:0`.
+* But we want to be able to access `/home/vscode/git/OpenTTD` as the `vscode` user.
+  The `--userns keep-id:uid=1000,gid=1000` maps our local host user to the container uid 1000 (hard-coded in the Dockerfile), so the mounted `${HOME:?}/git/OpenTTD` is effectively owned by the same non-root user in the host and in the container.
+  (thanks [reddit](https://www.reddit.com/r/podman/comments/103ut7z/explain_it_like_im_5_whats_the_recommended_way_of/))
+  
 
 
 ## Starting
@@ -40,12 +42,22 @@ Manage (root shell):
 $ podman exec -it devcontainer-deb-ssh /bin/bash
 ```
 
-Connect VS Code.
+## Connect VS Code.
+
+![VS Code](readme/img/install1.png)
+
+![VS Code](readme/img/install2.png)
+
+![VS Code](readme/img/install3.png)
+
+![VS Code](readme/img/install4.png)
+
+![VS Code](readme/img/connect.png)
+
+![VS Code](readme/img/done.png)
 
 
-
-TODO 
-Example to build openttd
+## TODO  Example to build openttd
 
 ```sh
 $ podman exec -it devcontainer-deb-ssh /bin/bash
