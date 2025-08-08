@@ -61,7 +61,7 @@ $ podman exec -it devcontainer-deb-ssh /bin/bash
 
 ```sh
 $ podman exec -it devcontainer-deb-ssh /bin/bash
-root@container:/# apt update && apt install -y --no-install-recommends bzip2 ca-certificates cmake git gnupg2 libc6-dev libfile-fcntllock-perl libfontconfig-dev libicu-dev liblzma-dev liblzo2-dev libsdl1.2-dev libsdl2-dev libxdg-basedir-dev make software-properties-common tar wget xz-utils zlib1g-dev
+root@container:/# apt update && apt install -y --no-install-recommends build-essential bzip2 ca-certificates cmake git gnupg2 libc6-dev libfile-fcntllock-perl libfontconfig-dev libicu-dev liblzma-dev liblzo2-dev libsdl1.2-dev libsdl2-dev libxdg-basedir-dev make software-properties-common tar wget xz-utils zlib1g-dev
 ```
 
 and run in bubblewrap
