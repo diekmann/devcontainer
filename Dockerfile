@@ -30,3 +30,6 @@ EXPOSE 22
 RUN service ssh start
 ENTRYPOINT ["/usr/sbin/sshd","-D"]
 
+# OpenTTD build deps
+RUN apt update && apt install -y --no-install-recommends build-essential bzip2 ca-certificates cmake git gnupg2 libc6-dev libfile-fcntllock-perl libfontconfig-dev libicu-dev liblzma-dev liblzo2-dev libsdl1.2-dev libsdl2-dev libxdg-basedir-dev make software-properties-common tar wget xz-utils zlib1g-dev && rm -rf /var/lib/apt/lists/*
+
