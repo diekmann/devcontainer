@@ -15,6 +15,7 @@ RUN useradd --create-home --shell /bin/bash --uid 1000 --user-group vscode
 #WORKDIR /home/vscode
 # useradd by default creates locked accounts, where we cannot login, even with publickey.
 RUN echo vscode:securepassword1 | chpasswd
+RUN mkdir -p /run/user/1000 && chown vscode:vscode /run/user/1000
 
 
 #TODO: caching! update always with install and rm the cache.

@@ -71,15 +71,13 @@ TODO:
 To actually run OpenTTD with graphics from the container, the initial `podman run` needs to mount the wayland socket into the container: `--mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true`. For hardware acceleration, add `--device /dev/dri`.
 
 ```sh
-$ podman run --name testwayland -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD --mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true -e XDG_RUNTIME_DIR=/run/user/1000 -e WAYLAND_DISPLAY=wayland-0 --device /dev/dri -d devcontainer-deb-ssh-image
+$ podman run --name devcontainer-deb-ssh -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD --mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true -e XDG_RUNTIME_DIR=/run/user/1000 -e WAYLAND_DISPLAY=wayland-0 --device /dev/dri -d devcontainer-deb-ssh-image
 ```
-
-TODO: chown vscode:vscode /run/user/1000 in dockerfile!
 
 Then, OpenTTD can be started from inside the container.
 
 ```sh
-$ podman exec -it --user 1000:1000 --workdir /home/vscode testwayland /bin/bash
+$ podman exec -it --user 1000:1000 --workdir /home/vscode devcontainer-deb-ssh /bin/bash
 vscode@container:~$ ./git/OpenTTD/build/openttd
 ```
 
