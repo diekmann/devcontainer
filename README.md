@@ -1,6 +1,6 @@
 # devcontainer
-A hardened dev environment in a container. For use with vscode. Via ssh; not containers.dev.
 
+A hardened dev environment in a container. For use with vscode. Via ssh; not containers.dev.
 
 ## Setup
 
@@ -11,11 +11,17 @@ We assume rootless podman.
 ```sh
 $ cp ~/.ssh/id_ed25519.pub .
 $ podman build -t devcontainer-deb-ssh-image .
+```
+
+To create a container to build the image:
+
+```sh
 $ podman run --name devcontainer-deb-ssh -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD -d devcontainer-deb-ssh-image
 ```
 
 
 Options explained
+
 * The sshd in the container is bound to `127.0.0.1:2222`, not externally reachable.
 * By default, we run the sshd as root, so we need `--user 0:0`.
 * But we want to be able to access `/home/vscode/git/OpenTTD` as the `vscode` user.
@@ -24,16 +30,25 @@ Options explained
   
 
 
+To actually run OpenTTD with graphics from the container, the initial `podman run` additionally needs to mount the wayland socket into the container: `--mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true`.
+For hardware acceleration, add `--device /dev/dri`.
+Security warning: the more we expose the host system into the container, the worse the isolation gets!
+
+```sh
+$ podman run --name devcontainer-deb-ssh -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD --mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true -e XDG_RUNTIME_DIR=/run/user/1000 -e WAYLAND_DISPLAY=wayland-0 --device /dev/dri -d devcontainer-deb-ssh-image
+```
+
+
 ## Starting
 
 ```sh
 $ podman start devcontainer-deb-ssh
 ```
 
-Debug that the container is up:
+Debug that the container is up and that we can connect to it and accept the fingerprint:
 
 ```sh
-$ ssh -v -p2222 vscode@127.0.0.1
+$ ssh -p2222 vscode@127.0.0.1
 ```
 
 Manage (root shell):
@@ -57,24 +72,9 @@ $ podman exec -it devcontainer-deb-ssh /bin/bash
 ![VS Code](readme/img/done.png)
 
 
-## TODO  Example to build openttd
+## Example to run openttd
 
-```sh
-$ podman exec -it devcontainer-deb-ssh /bin/bash
-root@container:/# apt update && apt install -y --no-install-recommends build-essential bzip2 ca-certificates cmake git gnupg2 libc6-dev libfile-fcntllock-perl libfontconfig-dev libicu-dev liblzma-dev liblzo2-dev libsdl1.2-dev libsdl2-dev libxdg-basedir-dev make software-properties-common tar wget xz-utils zlib1g-dev
-```
-
-and run in bubblewrap
-
-TODO:
-
-To actually run OpenTTD with graphics from the container, the initial `podman run` needs to mount the wayland socket into the container: `--mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true`. For hardware acceleration, add `--device /dev/dri`.
-
-```sh
-$ podman run --name devcontainer-deb-ssh -p 127.0.0.1:2222:22 --user 0:0 --userns keep-id:uid=1000,gid=1000 --mount type=bind,src=${HOME:?}/git/OpenTTD,target=/home/vscode/git/OpenTTD --mount type=bind,src="${XDG_RUNTIME_DIR:?}/${WAYLAND_DISPLAY:?}",target=/run/user/1000/wayland-0,ro=true -e XDG_RUNTIME_DIR=/run/user/1000 -e WAYLAND_DISPLAY=wayland-0 --device /dev/dri -d devcontainer-deb-ssh-image
-```
-
-Then, OpenTTD can be started from inside the container.
+OpenTTD can be started from inside the container.
 
 ```sh
 $ podman exec -it --user 1000:1000 --workdir /home/vscode devcontainer-deb-ssh /bin/bash
@@ -83,4 +83,4 @@ vscode@container:~$ ./git/OpenTTD/build/openttd
 
 Also install `libdecor-0-plugin-1-cairo` in debain if OpenTTD comes up without window bar and an error `Couldn't open plugin directory: ` ... `No plugins found, falling back on no decorations`.
 
-Security warning: the more we expose the host system into the container, the worse the isolation gets!
+TODO: compile statically and run on host in bubblewrap
