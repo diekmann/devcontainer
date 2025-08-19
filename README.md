@@ -1,6 +1,28 @@
 # devcontainer
 
-A hardened dev environment in a container. For use with vscode. Via ssh; not containers.dev.
+A hardened dev environment in a container. For use with vscode. Via ssh.
+
+## Related Work
+
+The VS-Code-native [containers.dev](https://containers.dev) by Microsoft also provides development containers.
+It's probably a smoother and more convenient setup.
+
+After testing it out, I chose to build my own, because
+
+* containers.dev seems to work best with (root) docker, whereas I prefer to work with rootless podman
+  * Side-note: I tried the containers.dev with rootless podman and I was very confused that `podman ps -a` did not show a single containers.dev container.
+  I'm very sure this was a side effect of running VS Code via the official Snap package on Ubuntu.
+  A Snap is basically a container itself.
+  And starting podman from this environment likely confuses uses the Snap containers `$XDG_RUNTIME_DIR`, not using my user's `/run/user/$UID`.
+  [podman heavily relies on this folder to store the state for running containers](https://www.redhat.com/en/blog/sudo-rootless-podman).
+* containers.dev allows to check in the container definition into the target repository into `.devcontainer/`.
+This is a great feature to ship the source code and the definition of the build environment in one go.
+At the same time, pulling a random repository and opening it in VS Code means arbitrary code execution (after clicking I trust the repo) on my host machine.
+It's a great setup for trusted code.
+But my requirements are different: I want to assume I don't fully trust the random remote repository and I want to run it and its VS Code extensions somewhat isolated from my host system.
+This requires that the devcontainer definition is *not* part of the source code, but provided by a trusted separate party.
+It's a security tradeoff where I chose inconvenience in exchange for better control over the supply chain.
+* It is fun building and exploring environments.
 
 ## Setup
 
